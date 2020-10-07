@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Elab.rs chatbot</title>
+
+    <!-- Ukljucivanje CSS fajla -->
+    <link rel="stylesheet" href="static/style.css">
+    
+    <!-- Ukljucivanje JQuery skripte -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+
+</head>
+<body>
+    <h1>Elab.rs chatbot</h1>
+    <div>
+        <div id="chatbox">
+            <p class="botText"><span>Zdravo! Kako ti mogu pomoci danas?</span></p>
+        </div>
+
+        <div id="userInput">
+            <input type="text" id="textInput" name="msg" placeholder="Unesi pitanje">
+            <input type="submit" id="buttonInput" value="Send">
+        </div>
+        <p><span class="userText"></span></p>
+
+        <!-- Skripta koja obradjuje nasu komunikaciju sa botom -->
+        <script>
+            function getBotResponse(){
+                // Uzimamo vrednost unesenu u input polje
+                var userPitanje = $("#textInput").val();
+                // Definise se html element kako bi se pitanje pojavilo u okviru interfejsa
+                var userHTML = '<p class="userText"><span >'+userPitanje+'</span></p>';
+                // Resetujemo vrednost input polja
+                $("#textInput").val("");
+                // Dodajemo taj html u okviru chatbox diva na sam kraj diva
+                $("#chatbox").append(userHTML);
+
+                //putem AJAX obradjujemo zahtev
+                // koristimo skraceni oblik - get funkciju kojoj prosledjujemo
+                // - url koji obradjujemo : /get  -definisan u app.py
+                // - argument get zahteva: poruka - koji sadrzi poruku iz input polja 
+                $.get('/get',{poruka:userPitanje}).done(function(data){
+                    // sa done() funkcijom obradjujemo uspesno obradjen zahtev (success)
+                    // u nasem slucaju dobijemo povratni odgovor od chatbota
+                    // odgovor se nalazi u data parametru
+
+                    //kreiramo html element za odgovor bota
+                    var botHTML = '<p class="botText"><span>'+data+'</span></p>';
+                    // Dodajemo taj html u okviru chatbox diva na sam kraj diva
+                    $("#chatbox").append(botHTML);
+                    //uvodimo smooth scroll do userInputa
+                    document.getElementById('userInput').scrollIntoView({block:"start", behavior:"smooth"}); 
+                });
+            }
+
+            //obradjujemo event koji se desi pritiskom na Enter
+            //Enter ima svoj kljuc, sto je 13
+            //Kljucevi za sve tastere: https://css-tricks.com/snippets/javascript/javascript-keycodes/
+            $("#textInput").keypress(function(e){
+                if(e.which==13){
+                    //pozivamo funkciju getBotResponse kako bismo obradili pitanje
+                    getBotResponse();
+                }
+            });
+            //obradjujemo klik na dugme 'Send'
+            $("#buttonInput").click(function(){
+                    //pozivamo funkciju getBotResponse kako bismo obradili pitanje
+                getBotResponse();
+            })
+        </script>
+    </div>
+</body>
+</html>
